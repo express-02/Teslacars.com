@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tesla Admin • Control Panel</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+    :root { --black:#000; --white:#fff; --gray-dark:#111; --gray-med:#222; --gray-light:#888; --green:#00ff88; --red:#ff4444; --gold:#ffaa00; }
+    * { margin:0; padding:0; box-sizing:border-box; font-family:'Inter',sans-serif; }
+    body { background:var(--black); color:var(--white); padding:20px; }
+    .hidden { display:none !important; }
+    #loginGate { max-width:400px; margin:80px auto; background:var(--gray-dark); padding:30px; border-radius:15px; border:1px solid var(--gray-med); }
+    #loginGate h2 { margin-bottom:5px; }
+    #loginGate .sub { color:var(--gray-light); font-size:0.85rem; margin-bottom:20px; }
+    input { width:100%; padding:12px; margin-bottom:15px; background:var(--gray-med); border:1px solid #333; color:var(--white); border-radius:5px; outline:none; }
+    input:focus { border-color:var(--white); }
+    .btn { background:var(--white); color:var(--black); border:none; padding:12px 25px; font-weight:700; border-radius:5px; cursor:pointer; transition:0.3s; }
+    .btn:hover { background:#ddd; }
+    .btn-block { width:100%; }
+    .btn-outline { background:transparent; border:1px solid var(--white); color:var(--white); }
+    .btn-outline:hover { background:var(--white); color:var(--black); }
+    
+    .wrap { max-width:1100px; margin:0 auto; }
+    .header { display:flex; justify-content:space-between; align-items:center; margin-bottom:25px; flex-wrap:wrap; gap:10px; }
+    .header h1 { font-size:1.5rem; }
+    .stats { display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:15px; margin-bottom:30px; }
+    .stat { background:var(--gray-dark); border:1px solid var(--gray-med); padding:15px; border-radius:10px; }
+    .stat .lbl { font-size:0.7rem; color:var(--gray-light); text-transform:uppercase; }
+    .stat .val { font-size:1.6rem; font-weight:700; }
+    
+    h3 { font-size:1rem; margin:25px 0 10px; color:#ddd; }
+    table { width:100%; border-collapse:collapse; background:var(--gray-dark); border-radius:10px; overflow:hidden; font-size:0.8rem; }
+    th, td { padding:12px 15px; text-align:left; border-bottom:1px solid var(--gray-med); }
+    th { background:var(--gray-med); color:var(--gray-light); font-size:0.7rem; text-transform:uppercase; }
+    .actions button { border:none; padding:6px 12px; border-radius:20px; font-size:0.7rem; font-weight:600; cursor:pointer; margin-right:5px; }
+    .approve { background:#0f2420; color:var(--green); }
+    .block { background:#251616; color:var(--red); }
+    .credit { background:#151d2b; color:#7ea8d8; }
+    .debit { background:#251d15; color:var(--gold); }
+    .status-pill { padding:3px 10px; border-radius:20px; font-size:0.7rem; }
+    .status-pill.pending { background:#251d15; color:var(--gold); }
+    .status-pill.approved { background:#0f2420; color:var(--green); }
+    .status-pill.blocked { background:#251616; color:var(--red); }
+    .toast { position:fixed; bottom:20px; left:50%; transform:translateX(-50%); background:var(--white); color:var(--black); padding:12px 20px; border-radius:8px; font-weight:600; display:none; z-index:1000; }
+    .empty { padding:30px; text-align:center; color:var(--gray-light); }
+</style>
+</head>
+<body>
+
+<!-- LOGIN GATE -->
+<div id="loginGate">
+    <h2>Admin Sign In</h2>
+    <p class="sub">Enter your Firebase admin credentials.</p>
+    <form id="loginForm">
+        <input type="email" id="adminEmail" placeholder="Email" required>
+        <input type="password" id="adminPassword" placeholder="Password" required>
+        <button type="submit" class="btn btn-block" id="loginBtn">SIGN IN</button>
+    </form>
+    <p id="loginError" style="color:var(--red); margin-top:10px; font-size:0.8rem;"></p>
+</div>
+
+<!-- ADMIN PANEL -->
+<div class="wrap hidden" id="adminPanel">
+    <div class="header">
+        <h1><i class="fas fa-shield-halved" style="color:var(--white); margin-right:10px;"></i>Tesla Admin Panel</h1>
+        <button class="btn btn-outline" id="logoutBtn"><i class="fas fa-sign-out-alt"></i> Sign Out</button>
+    </div>
+
+    <div class="stats">
+        <div class="stat"><div class="lbl">Total Users</div><div class="val" id="statUsers">0</div></div>
+        <div class="stat"><div class="lbl">Pending Approval</div><div class="val" id="statPending">0</div></div>
+        <div class="stat"><div class="lbl">Total Balance</div><div class="val" id="statBalance">$0</div></div>
+        <div class="stat"><div class="lbl">Car Orders</div><div class="val" id="statOrders">0</div></div>
+    </div>
+
+    <h3><i class="fas fa-users"></i> User Management</h3>
+    <table>
+        <thead><tr><th>User</th><th>Status</th><th>Balance</th><th>Actions</th></tr></thead>
+        <tbody id="userTable"></tbody>
+    </table>
+
+    <h3><i class="fas fa-arrow-down"></i> Deposit Requests</h3>
+    <table>
+        <thead><tr><th>User</th><th>Wallet</th><th>Requested</th><th>Status</th><th>Actions</th></tr></thead>
+        <tbody id="depositTable"></tbody>
+    </table>
+
+    <h3><i class="fas fa-bolt"></i> Plan Requests</h3>
+    <table>
+        <thead><tr><th>User</th><th>Amount</th><th>Requested</th><th>Status</th><th>Actions</th></tr></thead>
+        <tbody id="planTable"></tbody>
+    </table>
+
+    <h3><i class="fas fa-car"></i> Car Orders & Delivery</h3>
+    <table>
+        <thead><tr><th>User</th><th>Car</th><th>Buyer Info</th><th>Delivery Fee</th><th>Status</th><th>Actions</th></tr></thead>
+        <tbody id="carTable"></tbody>
+    </table>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<!-- FIREBASE -->
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-auth-compat.js"></script>
+<script>
+    // ✅ Firebase Config (Your existing config)
+    const firebaseConfig = {
+        apiKey: "AIzaSyAueqbCcGN_LKDTd6YnPkPcWSIufFqsqwM",
+        authDomain: "fedex-4bdba.firebaseapp.com",
+        projectId: "fedex-4bdba"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+</script>
+
+<script>
+// ==================== NEW UNIQUE KEYS (TESLA) ====================
+const USERS_KEY = 'teslaUsers';
+const SESSION_KEY = 'teslaSession';
+const DEPOSIT_KEY = 'teslaDepositRequests';
+const CAR_ORDERS_KEY = 'teslaCarOrders';
+const PLANS_KEY = 'teslaPlanRequests';
+
+const getUsers = () => JSON.parse(localStorage.getItem(USERS_KEY)) || [];
+const saveUsers = (u) => localStorage.setItem(USERS_KEY, JSON.stringify(u));
+const getDeposits = () => JSON.parse(localStorage.getItem(DEPOSIT_KEY)) || [];
+const saveDeposits = (d) => localStorage.setItem(DEPOSIT_KEY, JSON.stringify(d));
+const getCarOrders = () => JSON.parse(localStorage.getItem(CAR_ORDERS_KEY)) || [];
+const saveCarOrders = (c) => localStorage.setItem(CAR_ORDERS_KEY, JSON.stringify(c));
+const getPlanRequests = () => JSON.parse(localStorage.getItem(PLANS_KEY)) || [];
+const savePlanRequests = (p) => localStorage.setItem(PLANS_KEY, JSON.stringify(p));
+
+const toast = (msg) => {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.style.display = 'block';
+    setTimeout(() => t.style.display = 'none', 3000);
+};
+
+// ==================== AUTH ====================
+document.getElementById('loginForm').onsubmit = (e) => {
+    e.preventDefault();
+    document.getElementById('loginError').textContent = '';
+    document.getElementById('loginBtn').textContent = 'Signing in...';
+    auth.signInWithEmailAndPassword(
+        document.getElementById('adminEmail').value,
+        document.getElementById('adminPassword').value
+    ).catch(err => {
+        document.getElementById('loginError').textContent = 'Incorrect email or password.';
+        document.getElementById('loginBtn').textContent = 'SIGN IN';
+    });
+};
+
+document.getElementById('logoutBtn').onclick = () => auth.signOut();
+
+auth.onAuthStateChanged(user => {
+    if (user) {
+        document.getElementById('loginGate').classList.add('hidden');
+        document.getElementById('adminPanel').classList.remove('hidden');
+        renderAll();
+    } else {
+        document.getElementById('loginGate').classList.remove('hidden');
+        document.getElementById('adminPanel').classList.add('hidden');
+    }
+});
+
+// ==================== RENDER FUNCTIONS ====================
+function renderStats() {
+    const users = getUsers();
+    document.getElementById('statUsers').textContent = users.length;
+    document.getElementById('statPending').textContent = users.filter(u => u.status === 'pending').length;
+    document.getElementById('statBalance').textContent = '$' + users.reduce((s,u) => s + (u.balance || 0), 0).toLocaleString();
+    document.getElementById('statOrders').textContent = getCarOrders().length;
+}
+
+function renderUsers() {
+    const tbody = document.getElementById('userTable');
+    const users = getUsers();
+    if (users.length === 0) { tbody.innerHTML = '<tr><td colspan="4" class="empty">No users yet.</td></tr>'; return; }
+    tbody.innerHTML = users.map(u => `
+        <tr>
+            <td><strong>${u.name}</strong><br><span style="font-size:0.7rem;color:#888;">${u.email}</span></td>
+            <td><span class="status-pill ${u.status}">${u.status.toUpperCase()}</span></td>
+            <td>$${(u.balance || 0).toFixed(2)}</td>
+            <td class="actions">
+                ${u.status !== 'approved' ? `<button class="approve" onclick="approveUser('${u.email}')"><i class="fas fa-check"></i> Approve</button>` : ''}
+                ${u.status !== 'blocked' ? `<button class="block" onclick="blockUser('${u.email}')"><i class="fas fa-ban"></i> Block</button>` : ''}
+                <button class="credit" onclick="addFunds('${u.email}')"><i class="fas fa-plus"></i> Add</button>
+                <button class="debit" onclick="removeFunds('${u.email}')"><i class="fas fa-minus"></i> Remove</button>
+            </td>
+        </tr>
+    `).join('');
+}
+
+function renderDeposits() {
+    const tbody = document.getElementById('depositTable');
+    const deposits = getDeposits().reverse();
+    if (deposits.length === 0) { tbody.innerHTML = '<tr><td colspan="5" class="empty">No deposit requests.</td></tr>'; return; }
+    tbody.innerHTML = deposits.map(d => `
+        <tr>
+            <td><strong>${d.name}</strong><br><span style="font-size:0.7rem;color:#888;">${d.email}</span></td>
+            <td style="font-size:0.7rem;color:var(--green);">${d.wallet}</td>
+            <td style="font-size:0.7rem;">${new Date(d.requestedAt).toLocaleString()}</td>
+            <td><span class="status-pill ${d.status}">${d.status.toUpperCase()}</span></td>
+            <td class="actions">
+                ${d.status === 'pending' ? `<button class="approve" onclick="approveDeposit(${d.id})"><i class="fas fa-check"></i> Approve</button>` : ''}
+                ${d.status === 'pending' ? `<button class="block" onclick="declineDeposit(${d.id})"><i class="fas fa-xmark"></i> Decline</button>` : ''}
+            </td>
+        </tr>
+    `).join('');
+}
+
+function renderPlans() {
+    const tbody = document.getElementById('planTable');
+    const plans = getPlanRequests().reverse();
+    if (plans.length === 0) { tbody.innerHTML = '<tr><td colspan="5" class="empty">No plan requests.</td></tr>'; return; }
+    tbody.innerHTML = plans.map(p => `
+        <tr>
+            <td>${p.userName}<br><span style="font-size:0.7rem;color:#888;">${p.userEmail}</span></td>
+            <td>$${p.amount.toLocaleString()}</td>
+            <td style="font-size:0.7rem;">${new Date(p.requestedAt).toLocaleString()}</td>
+            <td><span class="status-pill ${p.status}">${p.status.toUpperCase()}</span></td>
+            <td class="actions">
+                ${p.status === 'pending' ? `<button class="approve" onclick="approvePlan(${p.id})"><i class="fas fa-check"></i> Activate</button>` : ''}
+            </td>
+        </tr>
+    `).join('');
+}
+
+function renderCarOrders() {
+    const tbody = document.getElementById('carTable');
+    const orders = getCarOrders().reverse();
+    if (orders.length === 0) { tbody.innerHTML = '<tr><td colspan="6" class="empty">No car orders yet.</td></tr>'; return; }
+    tbody.innerHTML = orders.map(o => `
+        <tr>
+            <td><strong>${o.userName}</strong><br><span style="font-size:0.7rem;color:#888;">${o.userEmail}</span></td>
+            <td><strong>${o.carName}</strong><br><span style="font-size:0.7rem;color:#888;">$${o.carPrice.toLocaleString()}</span></td>
+            <td style="font-size:0.7rem;">
+                ${o.buyerInfo.name}<br>
+                ${o.buyerInfo.phone}<br>
+                ${o.buyerInfo.address}, ${o.buyerInfo.city} ${o.buyerInfo.postal}
+            </td>
+            <td>$${o.deliveryFee}</td>
+            <td><span class="status-pill pending">${o.status.replace('_',' ').toUpperCase()}</span></td>
+            <td class="actions">
+                <button class="approve" onclick="markDelivered(${o.id})"><i class="fas fa-check"></i> Mark Delivered</button>
+            </td>
+        </tr>
+    `).join('');
+}
+
+function renderAll() {
+    renderStats(); renderUsers(); renderDeposits(); renderPlans(); renderCarOrders();
+}
+
+// ==================== ACTIONS ====================
+function approveUser(email) {
+    const users = getUsers();
+    const u = users.find(x => x.email === email);
+    if (u) { u.status = 'approved'; saveUsers(users); toast('✅ User approved.'); renderAll(); }
+}
+function blockUser(email) {
+    const users = getUsers();
+    const u = users.find(x => x.email === email);
+    if (u) { u.status = 'blocked'; saveUsers(users); toast('🚫 User blocked.'); renderAll(); }
+}
+function addFunds(email) {
+    const amt = parseFloat(prompt('Amount to ADD (USD):', '100'));
+    if (!amt || amt <= 0) return;
+    const users = getUsers();
+    const u = users.find(x => x.email === email);
+    if (u) { u.balance = (u.balance || 0) + amt; saveUsers(users); toast(`💰 Added $${amt}.`); renderAll(); }
+}
+function removeFunds(email) {
+    const amt = parseFloat(prompt('Amount to REMOVE (USD):', '50'));
+    if (!amt || amt <= 0) return;
+    const users = getUsers();
+    const u = users.find(x => x.email === email);
+    if (u) { u.balance = Math.max(0, (u.balance || 0) - amt); saveUsers(users); toast(`➖ Removed $${amt}.`); renderAll(); }
+}
+
+function approveDeposit(id) {
+    const deposits = getDeposits();
+    const d = deposits.find(x => x.id === id);
+    if (!d) return;
+    const amt = parseFloat(prompt('Enter the deposit amount to credit (USD):', '100'));
+    if (!amt || amt <= 0) return;
+    const users = getUsers();
+    const u = users.find(x => x.email === d.email);
+    if (u) { u.balance = (u.balance || 0) + amt; saveUsers(users); }
+    d.status = 'approved';
+    saveDeposits(deposits);
+    toast(`✅ Credited $${amt} to ${d.name}.`);
+    renderAll();
+}
+function declineDeposit(id) {
+    const deposits = getDeposits();
+    const d = deposits.find(x => x.id === id);
+    if (d) { d.status = 'declined'; saveDeposits(deposits); toast('🚫 Deposit declined.'); renderAll(); }
+}
+
+function approvePlan(id) {
+    const plans = getPlanRequests();
+    const p = plans.find(x => x.id === id);
+    if (!p) return;
+    const users = getUsers();
+    const u = users.find(x => x.email === p.userEmail);
+    if (u) {
+        if ((u.balance || 0) < p.amount) { toast('❌ User does not have enough balance.'); return; }
+        u.balance -= p.amount;
+        u.invested = (u.invested || 0) + p.amount;
+        saveUsers(users);
+    }
+    p.status = 'approved';
+    savePlanRequests(plans);
+    toast(`✅ Plan activated for ${p.userName}.`);
+    renderAll();
+}
+
+function markDelivered(id) {
+    const orders = getCarOrders();
+    const o = orders.find(x => x.id === id);
+    if (o) { o.status = 'delivered'; saveCarOrders(orders); toast(`✅ ${o.carName} marked as delivered.`); renderAll(); }
+}
+</script>
+</body>
+</html>
