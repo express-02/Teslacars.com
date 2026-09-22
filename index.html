@@ -18,7 +18,6 @@
         </div>
     </nav>
 
-    <!-- SLIDE-OUT MENU -->
     <div class="side-menu" id="sideMenu">
         <div class="side-menu-header">
             <div class="logo">T E S L A</div>
@@ -31,7 +30,6 @@
     </div>
     <div class="menu-overlay" id="menuOverlay"></div>
 
-    <!-- HERO 1: INVEST -->
     <section class="hero-section" id="investHero">
         <div class="hero-content">
             <p class="sub-label">INVESTMENTS</p>
@@ -41,7 +39,6 @@
         </div>
     </section>
 
-    <!-- ============ INTRO SECTION ============ -->
     <section class="intro-section">
         <div class="intro-container">
             <p class="intro-tag">OUR MISSION</p>
@@ -54,7 +51,6 @@
             </p>
         </div>
 
-        <!-- FEATURES GRID -->
         <div class="features-grid">
             <div class="feature-card">
                 <i class="fas fa-bolt"></i>
@@ -79,7 +75,6 @@
         </div>
     </section>
 
-    <!-- TEXT BEFORE SHOP SECTION -->
     <section class="pre-shop-section">
         <p class="intro-tag">BUILT FOR EVERY ROAD</p>
         <h2 class="pre-shop-title">Find the Tesla That Fits Your Life</h2>
@@ -90,7 +85,6 @@
         </p>
     </section>
 
-    <!-- HERO 2: SHOP -->
     <section class="hero-section dark-overlay" id="shopHero">
         <div class="hero-content">
             <p class="sub-label">VEHICLES</p>
@@ -100,7 +94,6 @@
         </div>
     </section>
 
-    <!-- ============ FOOTER ============ -->
     <footer class="site-footer">
         <div class="footer-content">
             <div class="footer-col">
@@ -148,11 +141,10 @@
         <div class="modal-content">
             <span class="close-btn" id="closeLogin">&times;</span>
             <h2>Sign In</h2>
-            <p id="loginNotice" class="login-notice" style="display:none;">Please log in to view cars.</p>
             <form id="loginForm">
                 <div class="input-group"><input type="email" id="loginEmail" placeholder="Email" required></div>
                 <div class="input-group"><input type="password" id="loginPassword" placeholder="Password" required></div>
-                <button type="submit" class="btn-primary btn-block">LOG IN</button>
+                <button type="submit" class="btn-primary btn-block" id="loginSubmitBtn">LOG IN</button>
             </form>
             <p class="switch-auth">Don't have an account? <a href="#" id="showSignup">Sign Up</a></p>
         </div>
@@ -169,11 +161,27 @@
                 <div class="input-group"><input type="password" id="regPassword" placeholder="Password" required></div>
                 <div class="input-group"><input type="text" id="regState" placeholder="State" required></div>
                 <div class="input-group"><input type="text" id="regPostal" placeholder="Postal Code" required></div>
-                <div class="input-group"><input type="date" id="regDob" required></div>
-                <button type="submit" class="btn-primary btn-block">SIGN UP</button>
+                <div class="input-group">
+    <label class="input-label">Date of Birth</label>
+    <input type="date" id="regDob" required>
+</div>
+                <button type="submit" class="btn-primary btn-block" id="signupSubmitBtn">SIGN UP</button>
             </form>
         </div>
     </div>
+
+    <!-- UNIVERSAL ANIMATED MODAL -->
+    <div class="modal-overlay" id="universalModal">
+        <div class="modal-content universal-modal" id="universalModalContent">
+            <div class="universal-icon" id="universalIcon"><i class="fas fa-info-circle"></i></div>
+            <h3 class="universal-title" id="universalTitle">Title</h3>
+            <p class="universal-text" id="universalText">Message</p>
+            <div class="universal-actions" id="universalActions"></div>
+        </div>
+    </div>
+
+    <!-- TOAST CONTAINER -->
+    <div class="toast-container" id="toastContainer"></div>
 
     <script src="script.js"></script>
     
