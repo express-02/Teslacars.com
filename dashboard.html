@@ -35,18 +35,18 @@
     </div>
     <div class="menu-overlay" id="dashMenuOverlay"></div>
 
-    <!-- LIVE TICKER -->
     <div class="ticker-wrap">
         <div class="ticker">
             <span class="tick-item">
                 <span class="red-dot"></span> LIVE MARKETS
                 <span class="price-tag">TSLA <span class="tick-price" id="tickTsla">$245.50</span> <span class="tick-pct green" id="tickTslaPct">+0.80%</span></span>
-<span class="price-tag">RIVN <span class="tick-price" id="tickRivn">$15.80</span> <span class="tick-pct green" id="tickRivnPct">+1.20%</span></span>
-<span class="price-tag">LCID <span class="tick-price" id="tickLcid">$3.45</span> <span class="tick-pct red" id="tickLcidPct">-0.30%</span></span>
-<span class="price-tag">NIO <span class="tick-price" id="tickNio">$5.20</span> <span class="tick-pct green" id="tickNioPct">+0.50%</span></span>
-<span class="price-tag">XPEV <span class="tick-price" id="tickXpev">$8.10</span> <span class="tick-pct green" id="tickXpevPct">+1.10%</span></span>
-<span class="price-tag">LI <span class="tick-price" id="tickLi">$25.40</span> <span class="tick-pct red" id="tickLiPct">-0.20%</span></span>
-<span class="price-tag">F <span class="tick-price" id="tickF">$12.30</span> <span class="tick-pct green" id="tickFPct">+0.40%</span></span>
+                <span class="price-tag">RIVN <span class="tick-price" id="tickRivn">$15.80</span> <span class="tick-pct green" id="tickRivnPct">+1.20%</span></span>
+                <span class="price-tag">LCID <span class="tick-price" id="tickLcid">$3.45</span> <span class="tick-pct red" id="tickLcidPct">-0.30%</span></span>
+                <span class="price-tag">NIO <span class="tick-price" id="tickNio">$5.20</span> <span class="tick-pct green" id="tickNioPct">+0.50%</span></span>
+                <span class="price-tag">XPEV <span class="tick-price" id="tickXpev">$8.10</span> <span class="tick-pct green" id="tickXpevPct">+1.10%</span></span>
+                <span class="price-tag">LI <span class="tick-price" id="tickLi">$25.40</span> <span class="tick-pct red" id="tickLiPct">-0.20%</span></span>
+                <span class="price-tag">F <span class="tick-price" id="tickF">$12.30</span> <span class="tick-pct green" id="tickFPct">+0.40%</span></span>
+            </span>
         </div>
     </div>
 
@@ -56,7 +56,6 @@
             <button class="tab-btn" data-tab="shop">SHOPPING</button>
         </div>
 
-        <!-- TAB 1: HOME -->
         <div id="tab-home" class="tab-content active">
             <h2 class="section-title">ACCOUNT OVERVIEW</h2>
             <div class="stats-grid">
@@ -65,7 +64,6 @@
                     <h3 class="stat-value" id="userBalance">$0.00</h3>
                     <i class="fas fa-wallet stat-icon"></i>
                 </div>
-                <!-- CHANGED: PROFITS -> STOCKS -->
                 <div class="stat-card">
                     <p class="stat-label">TOTAL STOCKS</p>
                     <h3 class="stat-value" id="userStocks">$0.00</h3>
@@ -79,13 +77,11 @@
             </div>
         </div>
 
-        <!-- TAB 2: SHOPPING -->
         <div id="tab-shop" class="tab-content">
             <h2 class="section-title">AVAILABLE VEHICLES</h2>
             <div class="car-grid" id="carGrid"></div>
         </div>
 
-        <!-- TAB 3: DEPOSIT -->
         <div id="tab-deposit" class="tab-content">
             <h2 class="section-title">DEPOSIT FUNDS</h2>
             <div class="deposit-info-panel">
@@ -151,13 +147,11 @@
             </div>
         </div>
 
-        <!-- TAB 4: STOCKS -->
         <div id="tab-plans" class="tab-content">
             <h2 class="section-title">AVAILABLE STOCKS</h2>
             <div class="plans-list" id="plansList"></div>
         </div>
 
-        <!-- TAB 5: PROFILE -->
         <div id="tab-profile" class="tab-content">
             <h2 class="section-title">MY PROFILE</h2>
             <div class="profile-hero">
@@ -171,7 +165,6 @@
             <h2 class="section-title" style="margin-top:25px;">ACCOUNT STATISTICS</h2>
             <div class="profile-stats">
                 <div class="p-stat"><i class="fas fa-wallet"></i><p class="p-stat-label">BALANCE</p><p class="p-stat-val" id="profBalance">$0</p></div>
-                <!-- CHANGED: PROFITS -> STOCKS -->
                 <div class="p-stat"><i class="fas fa-chart-pie"></i><p class="p-stat-label">STOCKS</p><p class="p-stat-val" id="profStocks">$0</p></div>
                 <div class="p-stat"><i class="fas fa-lock"></i><p class="p-stat-label">INVESTED</p><p class="p-stat-val" id="profInvested">$0</p></div>
             </div>
@@ -190,7 +183,6 @@
             <button class="btn-outline" style="margin-top:20px;" id="btnLogout">LOG OUT</button>
         </div>
 
-        <!-- TAB 6: ABOUT -->
         <div id="tab-about" class="tab-content">
             <h2 class="section-title">ABOUT TESLA</h2>
             <div class="about-card">
@@ -266,9 +258,26 @@
     <!-- TOAST CONTAINER -->
     <div class="toast-container" id="toastContainer"></div>
 
+    <!-- FIREBASE SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore-compat.js"></script>
+
     <script src="script.js"></script>
     <script>document.addEventListener('DOMContentLoaded', () => { if (typeof initDashboard === 'function') initDashboard(); });</script>
     
-    <script id="chatway" async="true" src="https://cdn.chatway.app/widget.js?id=UOchkXkTj0eY"></script>
+    <!--Start of Tawk.to Script-->
+    <script type="text/javascript">
+    var Tawk_API=Tawk_API||{}, Tawk_LoadStart=new Date();
+    (function(){
+    var s1=document.createElement("script"),s0=document.getElementsByTagName("script")[0];
+    s1.async=true;
+    s1.src='https://embed.tawk.to/6ab1ec50e43bda343f3cf336/default';
+    s1.charset='UTF-8';
+    s1.setAttribute('crossorigin','*');
+    s0.parentNode.insertBefore(s1,s0);
+    })();
+    </script>
+    <!--End of Tawk.to Script-->
 </body>
 </html>
